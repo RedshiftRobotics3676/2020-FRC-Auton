@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class DriveTrain extends SubsystemBase {
   /**
@@ -72,10 +73,11 @@ public class DriveTrain extends SubsystemBase {
   @Override
   public void periodic() {
     if (Manual) {
-      Base.tankDrive(LeftSpeed, RightSpeed);
+      Base.tankDrive(LeftSpeed * 2, RightSpeed * 2);
     }
 
     m_odometry.update(Rotation2d.fromDegrees(getHeading()), LeftTalon.getSelectedSensorPosition()*kDistance, RightTalon.getSelectedSensorPosition()*kDistance);
+    SmartDashboard.putNumber("Gyro", getHeading());
   }
 
   /**
@@ -112,20 +114,6 @@ public class DriveTrain extends SubsystemBase {
    * @param fwd the commanded forward movement
    * @param rot the commanded rotation
    */
-  public void arcadeDrive(double fwd, double rot) {
-    Base.arcadeDrive(fwd, rot);
-  }
-
-  /**
-   * Controls the left and right sides of the drive directly with voltages.
-   *
-   * @param leftVolts  the commanded left output
-   * @param rightVolts the commanded right output
-   */
-  public void tankDriveVolts(double leftVolts, double rightVolts) {
-    LeftMotors.setVoltage(leftVolts);
-    RightMotors.setVoltage(-rightVolts);
-  }
 
   /**
    * Resets the drive encoders to currently read a position of 0.

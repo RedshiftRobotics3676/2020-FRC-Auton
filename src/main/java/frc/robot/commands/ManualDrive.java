@@ -14,7 +14,7 @@ import frc.robot.subsystems.DriveTrain;
 
 public class ManualDrive extends CommandBase {
   DriveTrain kDriveTrain;
-  double LeftSpeed, RightSpeed;
+  double LeftSpeed, RightSpeed, PRight, PLeft;
   final double MaxAcceleration = 0.05;
   /**
    * Creates a new ManualDrive.
@@ -37,21 +37,23 @@ public class ManualDrive extends CommandBase {
     LeftSpeed = RobotContainer.XboxController.getY(Hand.kLeft);
     RightSpeed = RobotContainer.XboxController.getY(Hand.kRight);
     
-    /*if (LeftSpeed-kDriveTrain.LeftSpeed > MaxAcceleration) {
-      LeftSpeed = kDriveTrain.LeftSpeed + MaxAcceleration;
+    if (LeftSpeed-PLeft > MaxAcceleration) {
+      LeftSpeed = PLeft + MaxAcceleration;
     }
-    else if (kDriveTrain.LeftSpeed-LeftSpeed > MaxAcceleration) {
-      LeftSpeed = kDriveTrain.LeftSpeed - MaxAcceleration;
+    else if (PLeft-LeftSpeed > MaxAcceleration) {
+      LeftSpeed = PLeft - MaxAcceleration;
     }
 
-    if (RightSpeed-kDriveTrain.RightSpeed > MaxAcceleration) {
-      RightSpeed = kDriveTrain.RightSpeed + MaxAcceleration;
+    if (RightSpeed-PRight > MaxAcceleration) {
+      RightSpeed = PRight + MaxAcceleration;
     }
-    else if (kDriveTrain.RightSpeed-RightSpeed > MaxAcceleration) {
-      RightSpeed = kDriveTrain.RightSpeed - MaxAcceleration;
-    }*/
+    else if (PRight-RightSpeed > MaxAcceleration) {
+      RightSpeed = PRight - MaxAcceleration;
+    }
 
     kDriveTrain.SetSpeed(LeftSpeed, RightSpeed);
+    PLeft = LeftSpeed;
+    PRight = RightSpeed;
   }
 
   // Called once the command ends or is interrupted.
