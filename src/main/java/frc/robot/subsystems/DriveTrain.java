@@ -3,15 +3,16 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -28,21 +29,28 @@ public class DriveTrain extends SubsystemBase {
 
   private final DifferentialDrive drive = new DifferentialDrive(leftMotors, rightMotors);
 
-  private final Gyro gyro = new ADXRS450_Gyro();
+  private final AHRS gyro = new AHRS(I2C.Port.kMXP);
 
-  private final DifferentialDriveOdometry odometry;
+  DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
 
   public DriveTrain() {
-    LeftTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-    RightTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    LeftTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+    RightTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
     resetEncoders();
-    odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+    setMaxOutput(0.5);
   }
 
   @Override
   public void periodic() {
-    double LeftSpeed = RobotContainer.XboxController.getY(Hand.kLeft);
-    double RightSpeed = RobotContainer.XboxController.getY(Hand.kRight);
+    if (RobotContainer.XboxController.getXButton()) {
+      zeroHeading();
+      resetEncoders();
+    }
+
+    SmartDashboard.putNumber("Gyro", getHeading());
+    SmartDashboard.putNumber("Encoder", LeftTalon.getSelectedSensorPosition());
+    double LeftSpeed = -RobotContainer.XboxController.getY(Hand.kLeft);
+    double RightSpeed = RobotContainer.XboxController.getX(Hand.kLeft);
     drive.arcadeDrive(LeftSpeed, RightSpeed);
 
     odometry.update(Rotation2d.fromDegrees(getHeading()), LeftTalon.getSelectedSensorPosition()*Constants.DistancePerPulse,
@@ -54,7 +62,7 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(LeftTalon.getSelectedSensorVelocity()*Constants.DistancePerPulse,LeftTalon.getSelectedSensorVelocity()*Constants.DistancePerPulse);
+    return new DifferentialDriveWheelSpeeds(LeftTalon.getSelectedSensorVelocity()*Constants.DistancePerPulse,RightTalon.getSelectedSensorVelocity()*Constants.DistancePerPulse);
   }
 
   public void resetOdometry(Pose2d pose) {
@@ -72,7 +80,7 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public void resetEncoders() {
-    LeftTalon.setSelectedSensorPosition(0);
+    RightTalon.setSelectedSensorPosition(0);
     LeftTalon.setSelectedSensorPosition(0);
   }
 
