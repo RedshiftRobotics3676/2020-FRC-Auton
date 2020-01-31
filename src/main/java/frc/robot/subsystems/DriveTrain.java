@@ -18,26 +18,29 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
 public class DriveTrain extends SubsystemBase {
-  WPI_VictorSPX LeftVictor = new WPI_VictorSPX(Constants.LeftVictor);
-  WPI_TalonSRX LeftTalon = new WPI_TalonSRX(Constants.LeftTalon);
-  WPI_VictorSPX RightVictor = new WPI_VictorSPX(Constants.RightVictor);
-  WPI_TalonSRX RightTalon = new WPI_TalonSRX(Constants.RightTalon);
+  WPI_VictorSPX LeftVictor = new WPI_VictorSPX(Constants.RightVictor);
+  WPI_TalonSRX LeftTalon = new WPI_TalonSRX(Constants.RightTalon);
+  WPI_VictorSPX RightVictor = new WPI_VictorSPX(Constants.LeftVictor);
+  WPI_TalonSRX RightTalon = new WPI_TalonSRX(Constants.LeftTalon);
 
-  private final SpeedControllerGroup leftMotors = new SpeedControllerGroup(LeftTalon, LeftVictor);
+  private final SpeedControllerGroup leftMotors = new SpeedControllerGroup(LeftTalon);
 
-  private final SpeedControllerGroup rightMotors = new SpeedControllerGroup(RightTalon, RightVictor);
+  private final SpeedControllerGroup rightMotors = new SpeedControllerGroup(RightTalon);
 
-  private final DifferentialDrive drive = new DifferentialDrive(leftMotors, rightMotors);
+  public final DifferentialDrive drive = new DifferentialDrive(leftMotors, rightMotors);
 
   private final AHRS gyro = new AHRS(I2C.Port.kMXP);
 
   DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
 
   public DriveTrain() {
+    LeftVictor.follow(LeftTalon);
+    RightVictor.follow(RightTalon);
     LeftTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
     RightTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
     resetEncoders();
     setMaxOutput(0.5);
+    drive.setSafetyEnabled(false);
   }
 
   @Override
@@ -45,13 +48,16 @@ public class DriveTrain extends SubsystemBase {
     if (RobotContainer.XboxController.getXButton()) {
       zeroHeading();
       resetEncoders();
+      resetOdometry(new Pose2d(0, 0, new Rotation2d(0)));
     }
 
     SmartDashboard.putNumber("Gyro", getHeading());
+    //RightTalon.setVoltage(SmartDashboard.getNumber("Encoder", 0));
+    SmartDashboard.putNumber("Encoder2", RightTalon.getSelectedSensorPosition());
     SmartDashboard.putNumber("Encoder", LeftTalon.getSelectedSensorPosition());
-    double LeftSpeed = -RobotContainer.XboxController.getY(Hand.kLeft);
-    double RightSpeed = RobotContainer.XboxController.getX(Hand.kLeft);
-    drive.arcadeDrive(LeftSpeed, RightSpeed);
+    //double LeftSpeed = -RobotContainer.XboxController.getY(Hand.kLeft);
+    //double RightSpeed = RobotContainer.XboxController.getX(Hand.kLeft);
+    //drive.arcadeDrive(LeftSpeed, RightSpeed);
 
     odometry.update(Rotation2d.fromDegrees(getHeading()), LeftTalon.getSelectedSensorPosition()*Constants.DistancePerPulse,
                     RightTalon.getSelectedSensorPosition()*Constants.DistancePerPulse);
@@ -97,10 +103,10 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public double getHeading() {
-    return Math.IEEEremainder(gyro.getAngle(), 360);
+    return 0;//-Math.IEEEremainder(gyro.getAngle(), 360);
   }
 
   public double getTurnRate() {
-    return gyro.getRate();
+    return 0;//gyro.getRate();
   }
 }

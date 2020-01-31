@@ -7,7 +7,7 @@ import frc.robot.commands.Autodrive;
 import frc.robot.subsystems.DriveTrain;
 
 public class RobotContainer {
-  public final DriveTrain kDriveTrain = new DriveTrain();
+  public static final DriveTrain kDriveTrain = new DriveTrain();
   public static XboxController XboxController = new XboxController(0);
   JoystickButton Y = new JoystickButton(XboxController, 4);
   
@@ -16,7 +16,7 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    Y.whileHeld(new Autodrive(kDriveTrain));
+    Y.toggleWhenPressed(new Autodrive(kDriveTrain));
   }
 
   public Command getAutonomousCommand() {
