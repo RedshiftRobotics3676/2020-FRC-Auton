@@ -52,9 +52,10 @@ public class DriveTrain extends SubsystemBase {
     }
 
     SmartDashboard.putNumber("Gyro", getHeading());
-    //RightTalon.setVoltage(SmartDashboard.getNumber("Encoder", 0));
+    //RightTalon.setVoltage(1);
+    //LeftTalon.setVoltage(1);
     SmartDashboard.putNumber("Encoder2", RightTalon.getSelectedSensorPosition());
-    SmartDashboard.putNumber("Encoder", LeftTalon.getSelectedSensorPosition());
+    //SmartDashboard.putNumber("Encoder", LeftTalon.getSelectedSensorPosition());
     //double LeftSpeed = -RobotContainer.XboxController.getY(Hand.kLeft);
     //double RightSpeed = RobotContainer.XboxController.getX(Hand.kLeft);
     //drive.arcadeDrive(LeftSpeed, RightSpeed);
